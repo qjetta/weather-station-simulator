@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: weather-station-simulator
+
+weather:
+  port: ${WEATHER_PORT}
+  server: ${WEATHER_SERVER}

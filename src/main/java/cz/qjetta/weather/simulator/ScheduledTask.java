@@ -3,6 +3,7 @@ package cz.qjetta.weather.simulator;
 import java.time.LocalDateTime;
 import java.util.Random;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,34 +17,36 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class ScheduledTask {
-
-	private final String apiUrl = "http://localhost:9073/weather";
+	@Value(value = "${weather.server}")
+	private String server;
+	@Value(value = "${weather.port}")
+	private String port;
 
 	private final RestTemplate restTemplate;
 
 	@Scheduled(fixedRate = 15000// 15 seconds
-			, initialDelay = 1000)
+			, initialDelay = 30000)
 	public void sendRequest1() {
 		String stationId = "s1";
 		sendTemperature(stationId);
 	}
 
 	@Scheduled(fixedRate = 30000// 30 seconds
-			, initialDelay = 1000)
+			, initialDelay = 30000)
 	public void sendRequest2() {
 		String stationId = "s2";
 		sendTemperature(stationId);
 	}
 
 	@Scheduled(fixedRate = 45000// 45 seconds
-			, initialDelay = 1000)
+			, initialDelay = 30000)
 	public void sendRequest3() {
 		String stationId = "s3";
 		sendTemperature(stationId);
 	}
 
 	@Scheduled(fixedRate = 60000// 60 seconds
-			, initialDelay = 1000)
+			, initialDelay = 30000)
 	public void sendRequest4() {
 		String stationId = "s4";
 		sendTemperature(stationId);
@@ -52,13 +55,17 @@ public class ScheduledTask {
 	private void sendTemperature(String stationId) {
 		WeatherData weatherData = createWeatherData(stationId);
 		ResponseEntity<String> responseEntity = restTemplate
-				.postForEntity(apiUrl, weatherData, String.class);
+				.postForEntity(getApiUrl(), weatherData, String.class);
 		if (responseEntity.getStatusCode() == HttpStatus.CREATED) {
 			System.out.println(stationId);
 		} else {
 			System.out.println("Failed to insert weather data. Status code: "
 					+ responseEntity.getStatusCode());
 		}
+	}
+
+	private String getApiUrl() {
+		return "http://" + server + ":" + port + "/weather";
 	}
 
 	private WeatherData createWeatherData(String stationId) {
